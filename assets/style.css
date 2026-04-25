@@ -1,0 +1,165 @@
+.stApp {
+    background:
+        radial-gradient(circle at 10% 10%, rgba(37, 99, 235, 0.45), transparent 25%),
+        radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.35), transparent 25%),
+        radial-gradient(circle at 50% 90%, rgba(168, 85, 247, 0.25), transparent 30%),
+        #020617;
+    color: #f8fafc;
+}
+
+.block-container {
+    max-width: 1750px;
+    padding-top: 1rem;
+}
+
+h1, h2, h3, h4, p, label, span {
+    color: #f8fafc !important;
+}
+
+[data-testid="stSidebar"] {
+    background: rgba(15, 23, 42, 0.96);
+    border-right: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.hero {
+    padding: 28px 32px;
+    border-radius: 32px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(6, 182, 212, 0.16));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+    margin-bottom: 24px;
+}
+
+.hero-title {
+    font-size: 46px;
+    line-height: 1.05;
+    font-weight: 950;
+    letter-spacing: -1.4px;
+    color: white;
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    color: #cbd5e1 !important;
+    margin-top: 12px;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(14px);
+}
+
+.white-card {
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+}
+
+.white-card * {
+    color: #0f172a !important;
+}
+
+.blue-card {
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 0 46px rgba(37, 99, 235, 0.75);
+}
+
+.blue-card * {
+    color: white !important;
+}
+
+.metric-label {
+    font-size: 13px;
+    font-weight: 800;
+    opacity: 0.78;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    font-size: 33px;
+    font-weight: 950;
+    margin-top: 8px;
+}
+
+.good {
+    color: #22c55e !important;
+}
+
+.bad {
+    color: #ef4444 !important;
+}
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: rgba(255, 255, 255, 0.10);
+    border-radius: 18px;
+    padding: 14px 42px;
+    color: white;
+    font-weight: 900;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    box-shadow: 0 0 32px rgba(6, 182, 212, 0.65);
+}
+
+div[data-testid="stDataFrame"] {
+    background: white;
+    border-radius: 22px;
+    overflow: hidden;
+}
+
+.stButton button, .stDownloadButton button {
+    background: linear-gradient(135deg, #2563eb, #06b6d4) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 16px !important;
+    font-weight: 900 !important;
+    padding: 0.8rem 1.2rem !important;
+    box-shadow: 0 0 24px rgba(37, 99, 235, 0.55);
+}
+
+.leaflet-container {
+    border-radius: 32px;
+    box-shadow: 0 0 60px rgba(59, 130, 246, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+.pulse-marker {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, #38bdf8 35%, #2563eb 72%);
+    border: 3px solid white;
+    box-shadow: 0 0 18px #38bdf8, 0 0 42px #2563eb;
+    animation: pulse 1.5s infinite;
+}
+
+.pulse-marker-big {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, #fb923c 35%, #ef4444 72%);
+    border: 3px solid white;
+    box-shadow: 0 0 24px #fb923c, 0 0 52px #ef4444;
+    animation: pulse 1.25s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.92); opacity: 0.86; }
+    50% { transform: scale(1.18); opacity: 1; }
+    100% { transform: scale(0.92); opacity: 0.86; }
+}
