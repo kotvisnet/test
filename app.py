@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import folium
+import json
+import streamlit.components.v1 as components
 
-from streamlit_folium import st_folium
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
@@ -97,6 +97,52 @@ def build_growth_table(selected_year):
     return pd.DataFrame(rows)
 
 
+def build_yandex_map_html(points):
+    points_json = json.dumps(points, ensure_ascii=False)
+    return f"""
+    <div id="yandex-map" style="width: 100%; height: 760px; border-radius: 32px; overflow: hidden;"></div>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>
+    <script>
+      const points = {points_json};
+      const center = points.length
+        ? [
+            points.reduce((acc, p) => acc + p.lat, 0) / points.length,
+            points.reduce((acc, p) => acc + p.lon, 0) / points.length
+          ]
+        : [58.0, 70.0];
+
+      function createMap() {{
+        const map = new ymaps.Map("yandex-map", {{
+          center: center,
+          zoom: 4,
+          controls: ["zoomControl", "fullscreenControl", "typeSelector"]
+        }});
+
+        map.behaviors.enable(["drag", "dblClickZoom", "multiTouch"]);
+
+        points.forEach((p) => {{
+          const markerPreset = p.is_big ? "islands#redCircleDotIcon" : "islands#blueCircleDotIcon";
+          const placemark = new ymaps.Placemark(
+            [p.lat, p.lon],
+            {{
+              balloonContentHeader: p.title,
+              balloonContentBody: p.body,
+              hintContent: p.title
+            }},
+            {{
+              preset: markerPreset
+            }}
+          );
+
+          map.geoObjects.add(placemark);
+        }});
+      }}
+
+      ymaps.ready(createMap);
+    </script>
+    """
+
+
 years = sorted(df["year"].unique())
 
 st.sidebar.markdown("## Настройки")
@@ -128,14 +174,8 @@ with tab_map:
         st.markdown("## Интерактивная карта")
 
         latest = df[df["year"] == selected_year].copy()
-
-        m = folium.Map(
-            location=[58.0, 70.0],
-            zoom_start=4,
-            tiles="CartoDB dark_matter",
-            control_scale=True,
-            zoom_control=True,
-        )
+        map_points = []
+        map_selection = []
 
         if map_mode == "Регионы":
             region_points = (
@@ -149,59 +189,52 @@ with tab_map:
             )
 
             for _, row in region_points.iterrows():
-                marker_class = "pulse-marker-big" if row["population"] >= 1_500_000 else "pulse-marker"
-
-                folium.Marker(
-                    location=[row["lat"], row["lon"]],
-                    tooltip=row["region"],
-                    popup=f"""
-                    <div style="font-family:Arial;font-size:15px;">
-                        <b>{row['region']}</b><br>
-                        Население: {int(row['population']):,}<br>
-                        Средняя плотность: {row['density']:.1f}
-                    </div>
-                    """,
-                    icon=folium.DivIcon(
-                        html=f'<div class="{marker_class}"></div>'
-                    )
-                ).add_to(m)
+                region_name = row["region"]
+                map_selection.append(region_name)
+                map_points.append({
+                    "id": region_name,
+                    "title": region_name,
+                    "body": f"Население: {int(row['population']):,}<br>Средняя плотность: {row['density']:.1f}",
+                    "lat": float(row["lat"]),
+                    "lon": float(row["lon"]),
+                    "is_big": bool(row["population"] >= 1_500_000),
+                })
 
         else:
             for _, row in latest.iterrows():
-                marker_class = "pulse-marker-big" if row["population"] >= 1_000_000 else "pulse-marker"
+                municipality_name = row["municipality"]
+                map_selection.append(municipality_name)
+                map_points.append({
+                    "id": municipality_name,
+                    "title": municipality_name,
+                    "body": (
+                        f"Регион: {row['region']}<br>"
+                        f"Население: {int(row['population']):,}<br>"
+                        f"Плотность: {row['density']:.1f}"
+                    ),
+                    "lat": float(row["lat"]),
+                    "lon": float(row["lon"]),
+                    "is_big": bool(row["population"] >= 1_000_000),
+                })
 
-                folium.Marker(
-                    location=[row["lat"], row["lon"]],
-                    tooltip=row["municipality"],
-                    popup=f"""
-                    <div style="font-family:Arial;font-size:15px;">
-                        <b>{row['municipality']}</b><br>
-                        Регион: {row['region']}<br>
-                        Население: {int(row['population']):,}<br>
-                        Плотность: {row['density']:.1f}
-                    </div>
-                    """,
-                    icon=folium.DivIcon(
-                        html=f'<div class="{marker_class}"></div>'
-                    )
-                ).add_to(m)
-
-        result = st_folium(
-            m,
+        components.html(
+            build_yandex_map_html(map_points),
             height=760,
-            use_container_width=True,
-            returned_objects=["last_object_clicked_tooltip"]
         )
 
-        if result and result.get("last_object_clicked_tooltip"):
-            clicked = result["last_object_clicked_tooltip"]
+        selected_on_map = st.selectbox(
+            "Выберите территорию для аналитики",
+            map_selection,
+            index=0,
+            key="yandex_map_selection",
+        )
 
-            if clicked in df["municipality"].unique():
-                st.session_state.selected_place = clicked
-            else:
-                region_places = df[df["region"] == clicked]["municipality"].unique()
-                if len(region_places) > 0:
-                    st.session_state.selected_place = region_places[0]
+        if map_mode == "Регионы":
+            region_places = df[df["region"] == selected_on_map]["municipality"].unique()
+            if len(region_places) > 0:
+                st.session_state.selected_place = region_places[0]
+        else:
+            st.session_state.selected_place = selected_on_map
 
     with right:
         place = st.session_state.selected_place
@@ -262,8 +295,8 @@ with tab_map:
         st.markdown(
             """
             <div class="glass-card">
-                Наведите курсор на светящуюся точку, чтобы увидеть данные.
-                Кликните по точке, чтобы выбрать территорию для аналитики.
+                Наведите курсор на точку на карте Яндекс, чтобы увидеть данные.
+                Выберите территорию в поле под картой для детальной аналитики.
             </div>
             """,
             unsafe_allow_html=True
