@@ -40,7 +40,7 @@
 - Plotly
 - Scikit-learn
 - Statsmodels
-- Folium (интерактивная карта)
+- JavaScript API Яндекс Карт (интерактивная карта)
 
 ---
 
